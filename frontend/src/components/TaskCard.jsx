@@ -45,7 +45,7 @@ const TaskCard = ({task , index , handleTaskChanged }) => {
                     status: 'completed',
                     completedAt: new Date().toISOString()
                 });
-                toast.success("Nhiệm vụ đã được đánh dấu là hoàn thành!");
+                toast.success("Nhiệm vụ đã được đánh dấu là hoàn thành!!");
             } else {
                 await api.put(`/tasks/${task._id}`, { 
                     status: 'active',
