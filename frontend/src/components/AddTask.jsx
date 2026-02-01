@@ -12,7 +12,7 @@ const AddTask = ({ handleNewTaskAdded }) => {
   const addTask = async () => {
     if(newTaskTitle.trim()) {
       try {
-        await api.post("https://todo-x-ou4h.onrender.com/", {title: newTaskTitle});
+        await api.post("/tasks", {title: newTaskTitle});
         toast.success(`Thêm nhiệm vụ "${newTaskTitle}" thành công!`);
         handleNewTaskAdded();
       } catch (error) {

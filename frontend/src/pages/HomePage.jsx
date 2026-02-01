@@ -25,7 +25,7 @@ const HomePage = () => {
   const fetchTasks = async () => {
     try {
       const res = await api.get(`/tasks?filter=${dateQuery}`);
-      setTaskBuffer(res.data.tasks);
+      setTaskBuffer(res.data.tasks ?? []);
       setActiveTaskCount(res.data.activeCount);
       setCompleteTaskCount(res.data.completeCount);
     } catch (error) {
@@ -53,7 +53,8 @@ const HomePage = () => {
   };
 
   //biến
-  const filteredTasks = taskBuffer.filter((task) => {
+  const safeTaskBuffer = Array.isArray(taskBuffer) ? taskBuffer : [];
+  const filteredTasks = safeTaskBuffer.filter((task) => {
     switch (filter) {
       case 'active':
         return task.status === 'active';
