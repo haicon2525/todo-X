@@ -8,17 +8,23 @@ import TaskListPagination from '@/components/TaskListPagination'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
+import { visibleTaskLimit } from '@/lib/data'
 
 const HomePage = () => {
   const [taskBuffer , setTaskBuffer] = useState([]);
   const [activeTaskCount , setActiveTaskCount] = useState(0);
   const [completeTaskCount , setCompleteTaskCount] = useState(0);
   const [filter , setFilter] = useState('all');
+  const [dateQuery , setDateQuery] = useState('today');
+  const [page , setPage] = useState(1);
  
+  useEffect(() => {
+    setPage(1);
+  }, [filter, dateQuery]);
 
   const fetchTasks = async () => {
     try {
-      const res = await api.get("/tasks");
+      const res = await api.get(`/tasks?filter=${dateQuery}`);
       setTaskBuffer(res.data.tasks);
       setActiveTaskCount(res.data.activeCount);
       setCompleteTaskCount(res.data.completeCount);
@@ -30,10 +36,20 @@ const HomePage = () => {
   
    useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [dateQuery]);
 
   const handleTaskChanged = () => {
     fetchTasks();
+  };
+
+  const handlePrev = () => {
+    if (page > 1) {
+      setPage(prev => prev - 1);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
   //biến
@@ -42,11 +58,30 @@ const HomePage = () => {
       case 'active':
         return task.status === 'active';
       case 'completed':
-        return task.status === 'complete';
+        return task.status === 'completed';
       default:
         return true;
     }
   });
+
+  const visibleTasks = filteredTasks.slice(
+    (page - 1) * visibleTaskLimit, 
+    page * visibleTaskLimit
+  );
+
+  if (visibleTasks.length === 0 && page > 1) {
+    setPage(page - 1);
+  }
+
+  const handleNext = () => {
+    if (page < totalPages) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const totalPages = Math.ceil(filteredTasks.length / visibleTaskLimit);
+
+
 
 
   return (
@@ -80,15 +115,21 @@ const HomePage = () => {
 
               {/* Danh sách công việc */}
               <TaskList 
-                filteredTasks={filteredTasks}
+                filteredTasks={visibleTasks}
                 filter={filter} 
                 handleTaskChanged={handleTaskChanged}
                />
 
               {/* Phân trang danh sách công việc theo date */}
               <div className='flex flex-col items-center justify-between gap-6 sm:flex-row'>
-                <TaskListPagination />
-                <DateTimeFilter />
+                <TaskListPagination 
+                  handleNext={handleNext}
+                  handlePrev={handlePrev}
+                  handlePageChange={handlePageChange}
+                  page={page}
+                  totalPages={totalPages}
+                />
+                <DateTimeFilter dateQuery={dateQuery} setDateQuery={setDateQuery}/>
               </div>
 
             {/* Chân trang */}
