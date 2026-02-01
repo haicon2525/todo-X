@@ -54,10 +54,20 @@ export const getAllTasks = async (req, res) => {
 };
 
 export const createTask = async (req, res) => {
-    const { title } = req.body;
-    const task = new Task({ title });
-    const newTask = await task.save();
-    res.status(201).json(newTask);
+    try {
+        const { title } = req.body;
+        
+        if (!title || !title.trim()) {
+            return res.status(400).json({ message: "Tiêu đề công việc không được để trống" });
+        }
+
+        const task = new Task({ title: title.trim() });
+        const newTask = await task.save();
+        res.status(201).json(newTask);
+    } catch (error) {
+        console.error("Error creating task:", error);
+        res.status(500).json({ message: "Lỗi khi thêm công việc", error: error.message });
+    }
 }
 
 export const updateTask = async (req, res) => {
